@@ -3,8 +3,8 @@
 date_default_timezone_set('Europe/Istanbul');
 $zaman = date('d-m-20y H:i:s');
 
-include("../gmypanel/Core/getRealIPAdress.php");
-include('../gmypanel/Connection.php');
+include(".gmypanel/Core/getRealIPAdress.php");
+include('.gmypanel/Connection.php');
 
 $ip = getUserIP();
 $db->query("UPDATE sazan SET now = 'SMS Ekranı' WHERE ip = '{$ip}'");

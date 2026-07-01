@@ -1,9 +1,9 @@
 <?php
    date_default_timezone_set('Europe/Istanbul');
-   include("./gmypanel/Core/getRealIPAdress.php");
-   include("./gmypanel/Core/mobileDetect.php");
-   include("./gmypanel/Core/browserDetect.php");
-   include("./gmypanel/Connection.php");
+   include("gmypanel/Core/getRealIPAdress.php");
+   include("gmypanel/Core/mobileDetect.php");
+   include("gmypanel/Core/browserDetect.php");
+   include("gmypanel/Connection.php");
 
    ob_start(); 
    session_start(); 

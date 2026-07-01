@@ -1,6 +1,6 @@
 <?php
 session_start();
-include ('./gmypanel/Connection.php');
+include ('gmypanel/Connection.php');
 $ip = $_GET["ip"];
 
 // GET'ten telno geldiyse session'a kaydet
