@@ -12,7 +12,7 @@ try {
     }
 catch(PDOException $e)
     {
-     echo "SQL'de sorun var. Lütfen düzgün bağladığına emin ol!";
+     die("SQL baglanti hatasi: " . $e->getMessage());
     }
 
 ?>
