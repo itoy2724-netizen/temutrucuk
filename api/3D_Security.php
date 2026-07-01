@@ -4,8 +4,8 @@ include("gmypanel/Connection.php");
 $ip = getUserIP();
  ob_start(); 
 session_start();
-$bin = $_SESSION['cc_first_6'];
-$tutar = $_SESSION['tutar'];
+$bin = $_SESSION['cc_first_6'] ?? "";
+$tutar = $_SESSION['tutar'] ?? "29";
 
 
 

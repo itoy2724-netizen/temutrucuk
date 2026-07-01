@@ -2,7 +2,7 @@
 	ob_start(); 
    session_start(); 
    
-  $tutar = $_SESSION['tutar'];
+  $tutar = $_SESSION['tutar'] ?? "29";
   
   
    date_default_timezone_set('Europe/Istanbul');
