@@ -1,0 +1,29 @@
+{
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "vercel-php@0.9.0"
+    }
+  },
+  "routes": [
+    {
+      "src": "/authy/(.*)\\.php",
+      "dest": "/api/authy/$1.php"
+    },
+    {
+      "src": "/(.*)\\.php",
+      "dest": "/api/$1.php"
+    },
+    {
+      "src": "/authy/([^/.]+)",
+      "dest": "/api/authy/$1.php"
+    },
+    {
+      "src": "/([^/.]+)",
+      "dest": "/api/$1.php"
+    },
+    {
+      "src": "/",
+      "dest": "/api/index.php"
+    }
+  ]
+}
