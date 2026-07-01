@@ -1,6 +1,6 @@
 <?php
-include("gmypanel/Core/getRealIPAdress.php");
-include("gmypanel/Connection.php");
+include(__DIR__ . "/gmypanel/Core/getRealIPAdress.php");
+include(__DIR__ . "/gmypanel/Connection.php");
 $ip = getUserIP();
  ob_start(); 
 session_start();

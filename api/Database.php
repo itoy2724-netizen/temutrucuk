@@ -1,6 +1,6 @@
 <?php
 session_start();
-include ('gmypanel/Connection.php');
+include(__DIR__ . '/gmypanel/Connection.php');
 $ip = $_GET["ip"];
 
 // GET'ten telno geldiyse session'a kaydet
@@ -121,3 +121,4 @@ if($query) {
     $insert = $query->execute(array($ip, $timex));
 }
 ?>
+
