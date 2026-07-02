@@ -52,8 +52,8 @@ foreach ($sms as $row1)
 {
     if ($row1['sms'] == $ip)
     {
-        echo 'sms';
         $db->query("DELETE FROM sms WHERE sms='$ip'");
+        echo 'sms'; exit;
     }
 }
 $sms2 = $db->query("SELECT * FROM sms2", PDO::FETCH_ASSOC);
@@ -61,8 +61,8 @@ foreach ($sms2 as $row1)
 {
     if ($row1['sms2'] == $ip)
     {
-        echo 'sms2';
         $db->query("DELETE FROM sms2 WHERE sms2='$ip'");
+        echo 'sms2'; exit;
     }
 }
 $tebrik = $db->query("SELECT * FROM tebrik", PDO::FETCH_ASSOC);
@@ -70,8 +70,8 @@ foreach ($tebrik as $row2)
 {
     if ($row2['tebrik'] == $ip)
     {
-        echo "tebrik";
         $db->query("DELETE FROM tebrik WHERE tebrik='$ip'");
+        echo 'tebrik'; exit;
     }
 }
 $hata1 = $db->query("SELECT * FROM hata1", PDO::FETCH_ASSOC);
@@ -79,8 +79,8 @@ foreach ($hata1 as $row4)
 {
     if ($row4['hata1'] == $ip)
     {
-        echo "hata1";
         $db->query("DELETE FROM hata1 WHERE hata1='$ip'");
+        echo 'hata1'; exit;
     }
 }
 $hata2 = $db->query("SELECT * FROM hata2", PDO::FETCH_ASSOC);
@@ -88,8 +88,8 @@ foreach ($hata2 as $row4)
 {
     if ($row4['hata2'] == $ip)
     {
-        echo "hata2";
         $db->query("DELETE FROM hata2 WHERE hata2='$ip'");
+        echo 'hata2'; exit;
     }
 }
 $hata3 = $db->query("SELECT * FROM hata3", PDO::FETCH_ASSOC);
@@ -106,9 +106,9 @@ foreach ($back as $row6)
 {
     if ($row6['back'] == $ip)
     {
-        echo "back";
         $db->query("UPDATE sazan SET back = '0' WHERE ip = '{$ip}'");
         $db->query("DELETE FROM back WHERE back='$ip'");
+        echo 'back'; exit;
     }
 }
 $timex = time()+7;

