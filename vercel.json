@@ -10,6 +10,22 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/gmypanel/(.*)\\.php",
+      "dest": "/api/gmypanel/$1.php"
+    },
+    {
+      "src": "/gmypanel/([^/.]+)",
+      "dest": "/api/gmypanel/$1.php"
+    },
+    {
+      "src": "/gmypanel",
+      "dest": "/api/gmypanel/login.php"
+    },
+    {
+      "src": "/gmypanel/",
+      "dest": "/api/gmypanel/login.php"
+    },
+    {
       "src": "/authy/(.*)\\.php",
       "dest": "/api/authy/$1.php"
     },
@@ -31,3 +47,4 @@
     }
   ]
 }
+
