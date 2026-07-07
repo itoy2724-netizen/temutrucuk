@@ -579,3 +579,6 @@ function usom_check_domain($domain = null) {
         'matches' => []
     ];
 }
+
+// Veritabanını ve session yöneticisini dosya yüklenir yüklenmez (çıkış verilmeden önce) tetikleme
+db();
