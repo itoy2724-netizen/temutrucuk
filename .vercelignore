@@ -1,0 +1,5 @@
+.git
+.DS_Store
+tapu_db (1).sql
+*.sql
+*.lock
