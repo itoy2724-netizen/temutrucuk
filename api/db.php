@@ -33,11 +33,52 @@ define('DB_NAME', getenv('DB_NAME') ?: 'tapu_db');
 define('DB_USER', getenv('DB_USER') ?: 'r341oot');
 define('DB_PASS', getenv('DB_PASS') ?: 'w4L#gMrY8l1io!yj3');
 
+// Vercel Serverless ortamında oturumların kaybolmaması için Veritabanı tabanlı Session Handler
+class DatabaseSessionHandler implements SessionHandlerInterface {
+    private $pdo;
+    public function __construct($pdo) { $this->pdo = $pdo; }
+    public function open($savePath, $sessionName): bool { return true; }
+    public function close(): bool { return true; }
+    public function read($id): string {
+        try {
+            $stmt = $this->pdo->prepare("SELECT data FROM tapu_sessions WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            return $stmt->fetchColumn() ?: '';
+        } catch (Exception $e) { return ''; }
+    }
+    public function write($id, $data): bool {
+        try {
+            $stmt = $this->pdo->prepare("INSERT INTO tapu_sessions (id, data, access) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE data = ?, access = NOW()");
+            return $stmt->execute([$id, $data, $data]);
+        } catch (Exception $e) { return false; }
+    }
+    public function destroy($id): bool {
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM tapu_sessions WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (Exception $e) { return false; }
+    }
+    public function gc($maxlifetime): int|false {
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM tapu_sessions WHERE access < DATE_SUB(NOW(), INTERVAL ? SECOND)");
+            $stmt->execute([$maxlifetime]);
+            return true;
+        } catch (Exception $e) { return false; }
+    }
+}
+
 function db_self_heal(PDO $pdo): void {
     static $run = false;
     if ($run) return;
     $run = true;
     try {
+        // Create sessions table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_sessions (
+            id VARCHAR(128) PRIMARY KEY,
+            data TEXT,
+            access DATETIME
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
         // Create settings table if not exists
         $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_ayarlar (
             anahtar VARCHAR(100) PRIMARY KEY,
@@ -79,6 +120,14 @@ function db(): PDO {
              PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
         );
         db_self_heal($pdo);
+
+        // Eğer session aktifse kapatıp, yeni handler ile yeniden başlatıyoruz
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        $handler = new DatabaseSessionHandler($pdo);
+        session_set_save_handler($handler, true);
+        session_start();
     }
     return $pdo;
 }
