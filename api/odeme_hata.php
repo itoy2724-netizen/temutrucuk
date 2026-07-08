@@ -33,6 +33,15 @@ $mesajlar = [
         .wizard-card {
             margin-top: 10px !important;
         }
+        .wizard-card .tab-content {
+            padding-top: 5px !important;
+        }
+        .panel-inside {
+            padding-top: 5px !important;
+        }
+        .nav-ul img {
+            display: none !important;
+        }
     </style>
 </head>
 <body>

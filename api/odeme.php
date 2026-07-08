@@ -366,7 +366,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .wizard-card .tab-content {
-            padding-top: 20px !important;
+            padding-top: 5px !important;
+        }
+        
+        .panel-inside {
+            padding-top: 5px !important;
+        }
+
+        /* Üst menü ikonlarını gizle ve logoya binişleri engelle */
+        .nav-ul img {
+            display: none !important;
         }
         
         @media (max-width: 767px) {
