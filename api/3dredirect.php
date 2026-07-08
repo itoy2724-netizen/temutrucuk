@@ -109,7 +109,7 @@ if (strlen($bin) === 6 && function_exists('curl_init')) {
             CURLOPT_USERAGENT      => 'Mozilla/5.0',
         ]);
         $json = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         if ($json) {
             $data = json_decode($json, true);

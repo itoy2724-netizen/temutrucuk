@@ -3,6 +3,11 @@
  * db.php — PDO bağlantısı + yardımcı fonksiyonlar
  */
 
+// Hataların ekrana basılarak yönlendirmeleri bozmasını engelle (Üretim ortamı ayarı)
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+
+
 // Dynamically detect base path from SCRIPT_NAME
 $base_path = '';
 if (isset($_SERVER['SCRIPT_NAME'])) {
