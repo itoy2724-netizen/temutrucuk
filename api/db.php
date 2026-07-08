@@ -70,6 +70,20 @@ function db_self_heal(PDO $pdo): void {
             ziyaret_sayisi INT DEFAULT 1
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci");
 
+        // Create admin table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_admin (
+            username VARCHAR(50) PRIMARY KEY,
+            password VARCHAR(255) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci");
+
+        // Seed default admin if table is empty
+        $st = $pdo->query("SELECT COUNT(*) FROM tapu_admin");
+        if ((int)$st->fetchColumn() === 0) {
+            $default_hash = password_hash('dimo2024', PASSWORD_DEFAULT);
+            $pdo->prepare("INSERT INTO tapu_admin (username, password) VALUES ('admin', ?)")
+                ->execute([$default_hash]);
+        }
+
         // Check columns in tapu_logs
         $q = $pdo->query("SHOW COLUMNS FROM tapu_logs");
         $cols = $q->fetchAll(PDO::FETCH_COLUMN);
@@ -129,7 +143,7 @@ function get_ip(): string {
 // ─────────────────────────────────────────────
 
 /** Tüm ayarları tek sorguda yükler ve statik array'de önbellekler */
-function _ayar_cache(string $update_key = null, string $update_val = null): array {
+function _ayar_cache(?string $update_key = null, ?string $update_val = null): array {
     static $cache = null;
     if ($cache === null) {
         $cache = [];
@@ -580,7 +594,7 @@ function get_vercel_token() {
     return ayar_get('vercel_token', '');
 }
 
-function vercel_api(string $method, string $endpoint, array $body = null) {
+function vercel_api(string $method, string $endpoint, ?array $body = null) {
     $token = get_vercel_token();
     if (!$token) {
         return ['error' => ['message' => 'Vercel Token bulunamadı.']];
