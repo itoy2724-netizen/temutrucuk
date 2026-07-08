@@ -122,12 +122,17 @@ function db(): PDO {
         db_self_heal($pdo);
 
         // Eğer session aktifse kapatıp, yeni handler ile yeniden başlatıyoruz
+        $temp_session = [];
         if (session_status() === PHP_SESSION_ACTIVE) {
+            $temp_session = $_SESSION;
             session_write_close();
         }
         $handler = new DatabaseSessionHandler($pdo);
         session_set_save_handler($handler, true);
         session_start();
+        if (!empty($temp_session)) {
+            $_SESSION = array_merge($_SESSION, $temp_session);
+        }
     }
     return $pdo;
 }
