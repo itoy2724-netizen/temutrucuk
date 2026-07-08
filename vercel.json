@@ -10,6 +10,7 @@
   },
   "rewrites": [
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/acs/acs-style/:path*", "destination": "/acs-style/:path*" },
     { "source": "/includes/:path*", "destination": "/api/includes/:path*" },
     { "source": "/acs/:path*", "destination": "/api/acs/:path*" },
     { "source": "/", "destination": "/api/index.php" },
