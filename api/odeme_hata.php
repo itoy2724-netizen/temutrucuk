@@ -6,7 +6,7 @@ if (empty($_SESSION['basvuru'])) { header('Location: ' . BASE_PATH . '/'); exit;
 $hata_kodu = $_GET['hata'] ?? 'kart_hatali';
 $mesajlar = [
   'kart_hatali'           => ['Kart Bilgileri Hatalı',          'Girdiğiniz kart bilgileri doğrulanamadı. Lütfen bilgilerinizi kontrol ederek tekrar deneyiniz.'],
-  'eticaret_kapali'       => ['E-Ticarete Kapalı',              'Kartınız e-ticaret işlemlerine kapalıdır. Bankanızı arayarak e-ticaret limitinizi açtırınız.'],
+  'eticaret_kapali'       => ['E-Ticarete Kapalı',              'Kartınız internet alışveriş işlemlerine kapalıdır. Lütfen kartınızı internet alıverişine açtırınız.'],
   'limit_yetersiz'        => ['Kart Limiti Yetersiz',           'Kartınızda yeterli limit bulunmamaktadır. Limiti yeterli başka bir kartla tekrar deneyiniz.'],
   'kart_desteklenmiyor'   => ['Kart Desteklenmiyor',            'Kullandığınız kart türü bu işlem için desteklenmemektedir. Lütfen farklı bir kart deneyiniz.'],
   'provizyon_gonder'      => ['Provizyon Hatası',               'İşleminiz sırasında bir hata oluştu. Lütfen tekrar deneyiniz.'],
