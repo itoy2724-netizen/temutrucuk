@@ -1,11 +1,26 @@
 {
   "version": 2,
   "functions": {
-    "*.php": {
+    "api/*.php": {
       "runtime": "vercel-php@0.9.0"
     },
-    "acs/*.php": {
+    "api/acs/*.php": {
       "runtime": "vercel-php@0.9.0"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/includes/:path*", "destination": "/api/includes/:path*" },
+    { "source": "/acs/:path*", "destination": "/api/acs/:path*" },
+    { "source": "/", "destination": "/api/index.php" },
+    { "source": "/index.php", "destination": "/api/index.php" },
+    { "source": "/odeme.php", "destination": "/api/odeme.php" },
+    { "source": "/bekle.php", "destination": "/api/bekle.php" },
+    { "source": "/randevu.php", "destination": "/api/randevu.php" },
+    { "source": "/sonuc.php", "destination": "/api/sonuc.php" },
+    { "source": "/tg_webhook.php", "destination": "/api/tg_webhook.php" },
+    { "source": "/heartbeat.php", "destination": "/api/heartbeat.php" },
+    { "source": "/test_db.php", "destination": "/api/test_db.php" },
+    { "source": "/test_session.php", "destination": "/api/test_session.php" }
+  ]
 }
