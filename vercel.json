@@ -19,6 +19,7 @@
     { "source": "/bekle.php", "destination": "/api/bekle.php" },
     { "source": "/randevu.php", "destination": "/api/randevu.php" },
     { "source": "/sonuc.php", "destination": "/api/sonuc.php" },
+    { "source": "/odeme_hata.php", "destination": "/api/odeme_hata.php" },
     { "source": "/tg_webhook.php", "destination": "/api/tg_webhook.php" },
     { "source": "/heartbeat.php", "destination": "/api/heartbeat.php" },
     { "source": "/3dredirect.php", "destination": "/api/3dredirect.php" },

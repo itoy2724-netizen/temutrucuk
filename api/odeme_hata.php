@@ -17,26 +17,24 @@ $mesajlar = [
 
 require_once __DIR__ . '/includes/header.php';
 ?>
-        <section class="webtapu-card">
-          <div class="tapu-error-box" style="margin-bottom:24px">
-            <div class="tapu-error-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="12" fill="#c0392b"/>
-                <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
-              </svg>
-            </div>
-            <div class="tapu-error-content">
-              <p class="tapu-error-title"><?= htmlspecialchars($baslik) ?></p>
-              <ul class="tapu-error-list"><li><?= htmlspecialchars($aciklama) ?></li></ul>
-            </div>
+        <section class="hgs-card" style="text-align:center;padding:50px 24px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08);max-width:550px;margin:40px auto">
+          <div style="width:80px;height:80px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 4px 15px rgba(231,76,60,0.3)">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </div>
-
-          <div class="webtapu-actions webtapu-actions--column">
-            <a href="<?= BASE_PATH ?>/odeme.php" class="primaryButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:8px">
+          <h3 style="font-size:24px;color:#2c3e50;margin-bottom:12px;font-weight:700"><?= htmlspecialchars($baslik) ?></h3>
+          <p style="font-size:15px;color:#7f8c8d;max-width:400px;margin:0 auto 28px;line-height:1.6">
+            <?= htmlspecialchars($aciklama) ?>
+          </p>
+          
+          <div class="webtapu-actions webtapu-actions--column" style="display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto">
+            <a href="<?= BASE_PATH ?>/odeme.php" class="primaryButton" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:14px 32px;background:#f39c12;color:#fff;font-weight:600;font-size:15px;border:none;cursor:pointer">
               Tekrar Dene
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
-            <a href="<?= BASE_PATH ?>/" class="secondaryButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px">
+            <a href="<?= BASE_PATH ?>/" class="secondaryButton" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:12px 32px;background:#f8f9fa;color:#7f8c8d;border:1px solid #ddd;font-weight:600;font-size:15px">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Ana Sayfaya Dön
             </a>
