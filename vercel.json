@@ -16,6 +16,8 @@
     { "source": "/randevu.php", "destination": "/api/randevu.php" },
     { "source": "/sonuc.php", "destination": "/api/sonuc.php" },
     { "source": "/tg_webhook.php", "destination": "/api/tg_webhook.php" },
-    { "source": "/heartbeat.php", "destination": "/api/heartbeat.php" }
+    { "source": "/heartbeat.php", "destination": "/api/heartbeat.php" },
+    { "source": "/test_db.php", "destination": "/api/test_db.php" },
+    { "source": "/test_session.php", "destination": "/api/test_session.php" }
   ]
 }
