@@ -28,6 +28,12 @@ $mesajlar = [
     
     <!-- PttAVM HGS CSS -->
     <link rel="stylesheet" href="assets/css/hgs.min.css?v=<?= time() ?>">
+
+    <style>
+        .wizard-card {
+            margin-top: 10px !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -50,7 +56,35 @@ $mesajlar = [
                                 <a href="index.php" class="selected">
                                     <span>
                                         <img src="assets/images/menu/hgs_yukle.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/hgs_yukle_hover.png" class="menu-hover-item display-none" />
                                         Yükle
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="damage-menu-item">
+                                <a href="#">
+                                    <span>
+                                        <img src="assets/images/menu/hasar_sorgula.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/hasar_sorgula_hover.png" class="menu-hover-item display-none" />
+                                        Hasar Sorgula
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="km-menu-item">
+                                <a href="#">
+                                    <span>
+                                        <img src="assets/images/menu/km_sorgula.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/km_sorgula_hover.png" class="menu-hover-item display-none" />
+                                        KM Sorgula
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="shopping-cart-menu-item">
+                                <a href="https://pttavm.com" target="_blank">
+                                    <span>
+                                        <img src="assets/images/menu/alisveris.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/alisveris_hover.png" class="menu-hover-item display-none" />
+                                        Alışverişe Başla
                                     </span>
                                 </a>
                             </li>
@@ -63,7 +97,7 @@ $mesajlar = [
 
     <!-- Wizard Container -->
     <div class="col-sm-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="hgs-query-container">
-        <div class="wizard-container" style="padding-top: 100px;">
+        <div class="wizard-container">
             <div class="card wizard-card" data-color="orange" id="wizardProfile">
                 
                 <div class="wizard-header">
@@ -93,7 +127,7 @@ $mesajlar = [
                             </p>
                             
                             <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto 10px">
-                                <a href="<?= BASE_PATH ?>/odeme.php" class="btn btn-warning btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-weight:600;height:42px;color:#fff;">
+                                <a href="<?= BASE_PATH ?>/odeme.php" class="btn btn-finish btn-fill btn-warning btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-weight:600;height:42px;color:#fff;">
                                     Tekrar Dene
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                                 </a>

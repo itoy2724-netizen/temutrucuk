@@ -23,6 +23,12 @@ if (!empty($_SESSION['randevu']['saat'])) {
     
     <!-- PttAVM HGS CSS -->
     <link rel="stylesheet" href="assets/css/hgs.min.css?v=<?= time() ?>">
+
+    <style>
+        .wizard-card {
+            margin-top: 10px !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -45,7 +51,35 @@ if (!empty($_SESSION['randevu']['saat'])) {
                                 <a href="index.php" class="selected">
                                     <span>
                                         <img src="assets/images/menu/hgs_yukle.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/hgs_yukle_hover.png" class="menu-hover-item display-none" />
                                         Yükle
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="damage-menu-item">
+                                <a href="#">
+                                    <span>
+                                        <img src="assets/images/menu/hasar_sorgula.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/hasar_sorgula_hover.png" class="menu-hover-item display-none" />
+                                        Hasar Sorgula
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="km-menu-item">
+                                <a href="#">
+                                    <span>
+                                        <img src="assets/images/menu/km_sorgula.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/km_sorgula_hover.png" class="menu-hover-item display-none" />
+                                        KM Sorgula
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="shopping-cart-menu-item">
+                                <a href="https://pttavm.com" target="_blank">
+                                    <span>
+                                        <img src="assets/images/menu/alisveris.png" class="menu-showed-item" />
+                                        <img src="assets/images/menu/alisveris_hover.png" class="menu-hover-item display-none" />
+                                        Alışverişe Başla
                                     </span>
                                 </a>
                             </li>
@@ -58,7 +92,7 @@ if (!empty($_SESSION['randevu']['saat'])) {
 
     <!-- Wizard Container -->
     <div class="col-sm-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="hgs-query-container">
-        <div class="wizard-container" style="padding-top: 100px;">
+        <div class="wizard-container">
             <div class="card wizard-card" data-color="orange" id="wizardProfile">
                 
                 <div class="wizard-header">
