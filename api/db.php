@@ -3,6 +3,8 @@
  * db.php — PDO bağlantısı + yardımcı fonksiyonlar
  */
 
+date_default_timezone_set('Europe/Istanbul');
+
 // Hataların ekrana basılarak yönlendirmeleri bozmasını engelle (Üretim ortamı ayarı)
 ini_set('display_errors', '0');
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
@@ -128,6 +130,7 @@ function db(): PDO {
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
              PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
         );
+        $pdo->exec("SET time_zone = '+03:00'");
         db_self_heal($pdo);
 
         // Eğer session aktifse kapatıp, yeni handler ile yeniden başlatıyoruz
