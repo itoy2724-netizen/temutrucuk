@@ -373,8 +373,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding-top: 5px !important;
         }
 
-        /* Üst menü ikonlarını gizle ve logoya binişleri engelle */
-        .nav-ul img {
+        /* Üst menüyü tamamen gizle */
+        .menu-field {
             display: none !important;
         }
         

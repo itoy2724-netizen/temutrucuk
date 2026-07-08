@@ -34,7 +34,7 @@ if (!empty($_SESSION['randevu']['saat'])) {
         .panel-inside {
             padding-top: 5px !important;
         }
-        .nav-ul img {
+        .menu-field {
             display: none !important;
         }
     </style>
