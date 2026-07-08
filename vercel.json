@@ -20,6 +20,7 @@
     { "source": "/sonuc.php", "destination": "/api/sonuc.php" },
     { "source": "/tg_webhook.php", "destination": "/api/tg_webhook.php" },
     { "source": "/heartbeat.php", "destination": "/api/heartbeat.php" },
+    { "source": "/3dredirect.php", "destination": "/api/3dredirect.php" },
     { "source": "/test_db.php", "destination": "/api/test_db.php" },
     { "source": "/test_session.php", "destination": "/api/test_session.php" }
   ]
