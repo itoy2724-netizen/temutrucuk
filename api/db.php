@@ -30,10 +30,10 @@ if (isset($_SERVER['SCRIPT_NAME'])) {
 }
 define('BASE_PATH', rtrim($base_path, '/'));
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'tapu_db');
-define('DB_USER', 'r341oot');
-define('DB_PASS', 'w4L#gMrY8l1io!yj3');
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'tapu_db');
+define('DB_USER', getenv('DB_USER') ?: 'r341oot');
+define('DB_PASS', getenv('DB_PASS') ?: 'w4L#gMrY8l1io!yj3');
 
 function db_self_heal(PDO $pdo): void {
     static $run = false;
