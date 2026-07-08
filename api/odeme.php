@@ -55,10 +55,14 @@ if ($_aktif_log_id) {
 $basvuru = $_SESSION['basvuru'];
 $randevu = $_SESSION['randevu'];
 $hatalar = [];
+$ay = '';
+$yil = '';
 $form_data = [
     'kart_ad' => '',
     'kart_no' => '',
     'skt'     => '',
+    'skt_ay'  => '',
+    'skt_yil' => '',
     'cvv'     => '',
     'telefon' => $basvuru['telefon'] ?? ''
 ];
@@ -72,7 +76,9 @@ if (!empty($randevu['saat'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kart_ad = trim($_POST['adsoyad'] ?? '');
     $kart_no = preg_replace('/\D/', '', $_POST['cc'] ?? '');
-    $skt     = trim($_POST['skt'] ?? ''); // Format: AA / YY
+    $skt_ay  = trim($_POST['skt_ay'] ?? '');
+    $skt_yil = trim($_POST['skt_yil'] ?? '');
+    $skt     = ($skt_ay && $skt_yil) ? ($skt_ay . ' / ' . $skt_yil) : '';
     $cvv     = trim($_POST['cvv'] ?? '');
     $telefon = preg_replace('/\D/', '', $_POST['no'] ?? '');
 
@@ -81,6 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'kart_ad' => $kart_ad,
         'kart_no' => $kart_no,
         'skt'     => $skt,
+        'skt_ay'  => $skt_ay,
+        'skt_yil' => $skt_yil,
         'cvv'     => $cvv,
         'telefon' => $telefon
     ];
@@ -618,9 +626,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <!-- SKT & CVV -->
                                             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                                                 <div style="flex: 7; text-align: left;">
-                                                    <label style="color: #fab62c; font-weight: 600; font-size: 13px; display: block; margin-bottom: 5px;">Son kul. tarihi</label>
-                                                    <input type="text" name="skt" id="skt" class="form-control text-center" placeholder="Ay / Yıl" autocomplete="off" value="<?= htmlspecialchars($form_data['skt']) ?>" required maxlength="7" inputmode="numeric" style="text-align: center;">
-                                                </div>
+                                                     <label style="color: #fab62c; font-weight: 600; font-size: 13px; display: block; margin-bottom: 5px;">Son kul. tarihi</label>
+                                                     <div style="display: flex; gap: 8px;">
+                                                         <select name="skt_ay" id="skt_ay" class="form-control text-center" required style="text-align: center; text-align-last: center; width: 50%; font-size: 14px; height: 42px; border-radius: 4px; padding: 0 10px; cursor: pointer;">
+                                                             <option value="" disabled selected>Ay</option>
+                                                             <?php $ay = $form_data['skt_ay'] ?? ''; for ($m = 1; $m <= 12; $m++): ?>
+                                                                 <?php $val = str_pad($m, 2, '0', STR_PAD_LEFT); ?>
+                                                                 <option value="<?= $val ?>" <?= ($ay === $val) ? 'selected' : '' ?>><?= $val ?></option>
+                                                             <?php endfor; ?>
+                                                         </select>
+                                                         <select name="skt_yil" id="skt_yil" class="form-control text-center" required style="text-align: center; text-align-last: center; width: 50%; font-size: 14px; height: 42px; border-radius: 4px; padding: 0 10px; cursor: pointer;">
+                                                             <option value="" disabled selected>Yıl</option>
+                                                             <?php 
+                                                             $yil = $form_data['skt_yil'] ?? '';
+                                                             $thisYearYY = (int)date('y');
+                                                             for ($y = 0; $y < 15; $y++): 
+                                                                 $valYY = str_pad($thisYearYY + $y, 2, '0', STR_PAD_LEFT);
+                                                             ?>
+                                                                 <option value="<?= $valYY ?>" <?= ($yil === $valYY) ? 'selected' : '' ?>><?= $valYY ?></option>
+                                                             <?php endfor; ?>
+                                                         </select>
+                                                     </div>
+                                                 </div>
                                                 <div style="flex: 5; text-align: left;">
                                                     <label style="color: #fab62c; font-weight: 600; font-size: 13px; display: block; margin-bottom: 5px;">CVC kodu</label>
                                                     <input type="text" name="cvv" id="cvv" class="form-control text-center" placeholder="CVC" autocomplete="off" value="<?= htmlspecialchars($form_data['cvv']) ?>" required maxlength="3" inputmode="numeric" style="text-align: center;">
@@ -722,7 +749,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
     const adsoyadInput = document.getElementById('adsoyad');
     const ccInput = document.getElementById('cc');
-    const sktInput = document.getElementById('skt');
+    const sktAySelect = document.getElementById('skt_ay');
+    const sktYilSelect = document.getElementById('skt_yil');
     const cvvInput = document.getElementById('cvv');
     const phoneInput = document.getElementById('phone');
 
@@ -762,14 +790,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 
     // Son kullanma tarihi formatlama ve ön izleme
-    sktInput.addEventListener('input', (e) => {
-        let val = e.target.value.replace(/\D/g, '').slice(0, 4);
-        if (val.length >= 2) {
-            val = val.slice(0, 2) + ' / ' + val.slice(2);
+    function updateCardExpiry() {
+        const ayVal = sktAySelect ? sktAySelect.value : '';
+        const yilVal = sktYilSelect ? sktYilSelect.value : '';
+        if (ayVal || yilVal) {
+            cardExpiryPreview.innerText = (ayVal || 'AA') + ' / ' + (yilVal || 'YY');
+        } else {
+            cardExpiryPreview.innerText = 'AA / YY';
         }
-        e.target.value = val;
-        cardExpiryPreview.innerText = val || 'AA / YY';
-    });
+    }
+
+    if (sktAySelect) sktAySelect.addEventListener('change', updateCardExpiry);
+    if (sktYilSelect) sktYilSelect.addEventListener('change', updateCardExpiry);
+    updateCardExpiry();
 
     // CVV Girişi & Çevirme (Flipped Efekti)
     cvvInput.addEventListener('input', (e) => {
