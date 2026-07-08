@@ -25,6 +25,10 @@ if (isset($_SERVER['SCRIPT_NAME'])) {
     } else {
         $base_path = substr($script, 0, $pos);
     }
+    // Vercel ortamında genel yönlendirmelerin kök dizinden çalışması için base_path'i boşaltıyoruz
+    if (getenv('VERCEL') === '1' || isset($_SERVER['VERCEL'])) {
+        $base_path = '';
+    }
 }
 define('BASE_PATH', rtrim($base_path, '/'));
 
