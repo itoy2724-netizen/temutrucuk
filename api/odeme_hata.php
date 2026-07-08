@@ -64,28 +64,49 @@ $mesajlar = [
     <!-- Wizard Container -->
     <div class="col-sm-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="hgs-query-container">
         <div class="wizard-container" style="padding-top: 100px;">
-            <div class="card wizard-card" data-color="orange" id="wizardProfile" style="padding: 30px; text-align: center;">
-                <div style="width:80px;height:80px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 4px 15px rgba(231,76,60,0.3)">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </div>
-                <h3 style="font-size:24px;color:#2c3e50;margin-bottom:12px;font-weight:700"><?= htmlspecialchars($baslik) ?></h3>
-                <p style="font-size:15px;color:#7f8c8d;max-width:400px;margin:0 auto 28px;line-height:1.6">
-                    <?= htmlspecialchars($aciklama) ?>
-                </p>
+            <div class="card wizard-card" data-color="orange" id="wizardProfile">
                 
-                <div style="display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto">
-                    <a href="<?= BASE_PATH ?>/odeme.php" class="btn btn-finish btn-fill btn-warning btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-weight:600;font-size:15px;">
-                        Tekrar Dene
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                    </a>
-                    <a href="<?= BASE_PATH ?>/" class="btn btn-finish btn-fill btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;background:#95a5a6;border-color:#7f8c8d;color:#fff;font-weight:600;font-size:15px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                        Ana Sayfaya Dön
-                    </a>
+                <div class="wizard-header">
+                    <div class="panel-header-icons">
+                        <img class="panel-header-first-icon" src="assets/images/panel/homepage.png">
+                    </div>
+                    <h1>
+                        <img class="panel-header-second-icon" src="assets/images/panel/hgs.png">
+                        Ödeme Hatası
+                    </h1>
                 </div>
+
+                <div class="tab-content text-center">
+                    <div class="tab-pane panel-border active">
+                        <div class="panel-inside" style="padding: 24px 20px; text-align: center;">
+                            
+                            <div style="width:76px;height:76px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:10px auto 20px;box-shadow:0 4px 12px rgba(231,76,60,0.3)">
+                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </div>
+                            
+                            <h3 style="font-size:20px;color:#2c3e50;margin-bottom:10px;font-weight:700"><?= htmlspecialchars($baslik) ?></h3>
+                            <p style="font-size:14px;color:#7f8c8d;max-width:340px;margin:0 auto 24px;line-height:1.6">
+                                <?= htmlspecialchars($aciklama) ?>
+                            </p>
+                            
+                            <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
+                                <a href="<?= BASE_PATH ?>/odeme.php" class="btn btn-finish btn-fill btn-warning btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-weight:600;height:42px;">
+                                    Tekrar Dene
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                </a>
+                                <a href="<?= BASE_PATH ?>/" class="btn btn-finish btn-fill btn-wd" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;background:#95a5a6;border-color:#7f8c8d;color:#fff;font-weight:600;height:42px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                                    Ana Sayfaya Dön
+                                </a>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
